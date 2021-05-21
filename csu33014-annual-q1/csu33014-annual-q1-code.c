@@ -258,13 +258,44 @@ void vectorized_6(float * restrict a, float * restrict b,
 		       float * restrict c) {
   // replace the following code with vectorized code
   a[0] = 0.0;
-  for ( int i = 1; i < 1023; i++ ) {
+  for ( int i = 1; i < 4; i++ ) {
     float sum = 0.0;
     for ( int j = 0; j < 3; j++ ) {
       sum = sum +  b[i+j-1] * c[j];
     }
     a[i] = sum;
   }
+  
+  __m128 b_1;
+  __m128 b_2;
+  __m128 c_1 = _mm_setr_ps(c[0], c[1], c[2], 0.0f);
+  __m128 c_2 = _mm_setr_ps(0.0f, c[0], c[1], c[2]);
+  __m128 prod_1;
+  __m128 prod_2;
+  __m128 sum_1;
+  __m128 sum_2;
+  __m128 a_vec;
+  for(int i = 4; i < 1020; i+=4) {
+    b_1 = _mm_setr_ps(b[i-1], b[i], b[i+1], b[i+2]);
+    b_2 = _mm_setr_ps(b[i+1], b[i+2], b[i+3], b[i+4]);
+    prod_1 = _mm_mul_ps(b_1, c_1);
+    prod_2 = _mm_mul_ps(b_1, c_2);
+    sum_1 = _mm_hadd_ps(prod_1, prod_2);
+    prod_1 = _mm_mul_ps(b_2, c_1);
+    prod_2 = _mm_mul_ps(b_2, c_2);
+    sum_2 = _mm_hadd_ps(prod_1, prod_2);
+    a_vec = _mm_hadd_ps(sum_1, sum_2);
+    _mm_store_ps(&a[i], a_vec);
+  }
+
+  for ( int i = 1020; i < 1023; i++ ) {
+    float sum = 0.0;
+    for ( int j = 0; j < 3; j++ ) {
+      sum = sum +  b[i+j-1] * c[j];
+    }
+    a[i] = sum;
+  }
+
   a[1023] = 0.0;
 }
 
