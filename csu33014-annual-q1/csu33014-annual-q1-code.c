@@ -198,7 +198,7 @@ void vectorized_4(float * restrict a, float * restrict b,
     c_vec = _mm_shuffle_ps(c_vec, c_vec, _MM_SHUFFLE(2, 3, 0, 1));
     prod_2 = _mm_mul_ps(b_vec, c_vec);
     prod_2 = _mm_hadd_ps(prod_2, prod_2);
-    a_vec = _mm_shuffle_ps(prod_1, prod_2, _MM_SHUFFLE(3, 2, 3, 2));
+    a_vec = _mm_shuffle_ps(prod_2, prod_1, _MM_SHUFFLE(3, 2, 3, 2));
     a_vec = _mm_shuffle_ps(a_vec, a_vec, _MM_SHUFFLE(3, 1, 2, 0));
     _mm_store_ps(&a[i], a_vec);
   }
