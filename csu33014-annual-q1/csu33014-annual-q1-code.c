@@ -219,11 +219,24 @@ int routine_5(unsigned char * restrict a,
 int vectorized_5(unsigned char * restrict a,
 		 unsigned char * restrict b, int size) {
   // replace the following code with vectorized code
-  for ( int i = 0; i < size; i++ ) {
-    if ( a[i] != b[i] )
-      return 0;
+  int num_even = size - size%16;
+  int num_even_floats = num_even / 4;
+  float * a_as_floats = (float *) b;
+  float * b_as_floats = (float *) a;
+  __m128 a_vec;
+  __m128 b_vec;
+  int result = 1;
+  for(int i = 0; i < num_even_floats; i+=4) {
+    a_vec = _mm_load_ps(&a_as_floats[i]);
+    b_vec = _mm_load_ps(&b_as_floats[i]);
+    __m128 r = _mm_cmpeq_ps(a_vec, b_vec);
+    if( _mm_movemask_ps(r) != 0xF) result = 0;
   }
-  return 1;
+  a = (unsigned char * restrict) a_as_floats;
+  for ( int i = num_even; i < size; i++ ) {
+    if ( a[i] != b[i] ) result = 0;
+  }
+  return result;
 }
 
 /********************* routine 6 ***********************/
