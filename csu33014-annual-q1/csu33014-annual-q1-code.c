@@ -230,7 +230,7 @@ int vectorized_5(unsigned char * restrict a,
     a_vec = _mm_load_ps(&a_as_floats[i]);
     b_vec = _mm_load_ps(&b_as_floats[i]);
     __m128 r = _mm_cmpeq_ps(a_vec, b_vec);
-    if( _mm_movemask_ps(r) != 0xF) result = 0;
+    if( _mm_movemask_ps(r) == 0xF) result = 0;
   }
   a = (unsigned char * restrict) a_as_floats;
   for ( int i = num_even; i < size; i++ ) {
