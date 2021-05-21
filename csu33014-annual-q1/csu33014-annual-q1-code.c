@@ -146,6 +146,22 @@ void routine_3(float * restrict a, float * restrict b, int size) {
 
 void vectorized_3(float * restrict a, float * restrict b, int size) {
   // replace the following code with vectorized code
+  __m128 a_vec;
+  __m128 b_vec;
+  __m128 a_mask;
+  __m128 b_mask;
+
+  int num_even = size - size%4;
+  for(int i = 0; i < num_even; i+=4) {
+    a_vec = _mm_load_ps(&a[i]);
+    b_vec = _mm_load_ps(&b[i]);
+    a_mask = _mm_cmpge_ps(a_vec, b_vec);
+    b_mask = _mm_cmplt_ps(a_vec, b_vec);
+    a_vec = _mm_and_ps(a_vec, a_mask);
+    b_vec = _mm_and_ps(b_vec, b_mask);
+    a_vec = _mm_or_ps(a_vec, b_vec);
+    _mm_store_ps(&a[i], a_vec);
+  }
   for ( int i = 0; i < size; i++ ) {
     if ( a[i] < b[i] ) {
       a[i] = b[i];
