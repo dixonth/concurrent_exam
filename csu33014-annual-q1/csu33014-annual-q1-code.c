@@ -118,6 +118,15 @@ void routine_2(float * restrict a, float * restrict b, int size) {
 
 void vectorized_2(float * restrict a, float * restrict b, int size) {
   // replace the following code with vectorized code
+  __m128 b_vec;
+  __m128 our_num = _mm_set1_ps(1.5379f);
+  int num_even = size - size%4;
+  for(int i = 0; i < num_even; i+=4) {
+    b_vec = _mm_load_ps(&b[i]);
+    b_vec = _mm_rcp_ps(b_vec);
+    b_vec = _mm_sub_ps(our_num, b_vec);
+    _mm_store_ps(&a[i], b_vec);
+  }
   for ( int i = 0; i < size; i++ ) {
     a[i] = 1.5379 - (1.0/b[i]);
   }
