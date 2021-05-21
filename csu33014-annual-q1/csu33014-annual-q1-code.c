@@ -242,11 +242,19 @@ void routine_6(float * restrict a, float * restrict b,
 
 void vectorized_6(float * restrict a, float * restrict b,
 		       float * restrict c) {
+  a[0] = 0.0;                             
+  for ( int i = 1; i < 4; i++ ) {                   //pass through once with old code so that b[i-1] works below
+    float sum = 0.0;
+    for ( int j = 0; j < 3; j++ ) {
+      sum = sum +  b[i+j-1] * c[j];
+    }
+    a[i] = sum;
+  }
+
   __m128 b_vector_1, b_vector_2, product_1, product_2, sum_1, sum_2, a_vector;
   __m128 c_vector_1 = _mm_setr_ps(c[0], c[1], c[2], 0.0f);    //initialise vector with 0 in c[3]
   __m128 c_vector_2 = _mm_setr_ps(0.0f, c[0], c[1], c[2]);    //initialise vector with 0 in c[0]
 
-  a[0] = 0.0; 
   for(int i = 4; i < 1020; i+=4) {
     b_vector_1 = _mm_setr_ps(b[i-1], b[i], b[i+1], b[i+2]);   //initialise vectors
     b_vector_2 = _mm_setr_ps(b[i+1], b[i+2], b[i+3], b[i+4]);
@@ -260,7 +268,7 @@ void vectorized_6(float * restrict a, float * restrict b,
     _mm_store_ps(&a[i], a_vector);
   }
 
-  for ( int i = 1020; i < 1023; i++ ) {                       //use original code to deal with remainder(%4)
+  for ( int i = 1020; i < 1023; i++ ) {                       //deal with remainder (%4)
     float sum = 0.0;
     for ( int j = 0; j < 3; j++ ) {
       sum = sum +  b[i+j-1] * c[j];
