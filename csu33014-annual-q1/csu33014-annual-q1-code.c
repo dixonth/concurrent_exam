@@ -69,15 +69,41 @@ float routine_1(float * restrict a, float * restrict b,
 // in the following, size can have any positive value
 float vectorized_1(float * restrict a, float * restrict b,
 		   int size) {
-  // replace the following code with vectorized code
-  float sum_a = 0.0;
-  float sum_b = 0.0;
-  
-  for ( int i = 0; i < size; i++ ) {
-    sum_a = sum_a + a[i];
-    sum_b = sum_b + b[i];
+  if(size >= 4) {
+    float * sum_a_output = malloc(sizeof(float)*4);       
+    float * sum_b_output = malloc(sizeof(float)*4);
+    __m128 sum_a_vec = _mm_set1_ps(0.0f);
+    __m128 sum_b_vec = _mm_set1_ps(0.0f);
+    __m128 a_vec;
+    __m128 b_vec;
+    int num_even = size - size%4;
+    for(int i = 0; i < num_even; i+=4) {
+      a_vec = _mm_load_ps(&a[i]);
+      b_vec = _mm_load_ps(&b[i]);
+      sum_a_vec = _mm_add_ps(sum_a_vec, a_vec);
+      sum_b_vec = _mm_add_ps(sum_b_vec, b_vec);
+    }
+    _mm_store_ps(sum_a_output, sum_a_vec);
+    _mm_store_ps(sum_b_output, sum_b_vec);
+    float sum_a = sum_a_output[0]+sum_a_output[1]+sum_a_output[2]+sum_a_output[3];
+    float sum_b = sum_b_output[0]+sum_b_output[1]+sum_b_output[2]+sum_b_output[3];
+    for(int i = num_even; i < size; i++) {
+      sum_a += a[i];
+      sum_b += b[i];
+    }
+    free(sum_a_output);
+    free(sum_b_output);
+    return sum_a * sum_b;
   }
-  return sum_a * sum_b;
+  else {
+    float sum_a = 0.0;
+    float sum_b = 0.0;
+    for ( int i = 0; i < size; i++ ) {
+      sum_a = sum_a + a[i];
+      sum_b = sum_b + b[i];
+    }
+    return sum_a * sum_b;
+  }
 }
 
 /******************* routine 2 ***********************/
