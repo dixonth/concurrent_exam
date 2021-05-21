@@ -116,7 +116,6 @@ void routine_2(float * restrict a, float * restrict b, int size) {
 
 
 void vectorized_2(float * restrict a, float * restrict b, int size) {
-  // replace the following code with vectorized code
   __m128 b_vector;
   __m128 our_num = _mm_set1_ps(1.5379f);              //initalise our_num vector with all 1.5379s
   int num_even = size - size%4;                       //calculate number of iterations
@@ -144,7 +143,6 @@ void routine_3(float * restrict a, float * restrict b, int size) {
 
 
 void vectorized_3(float * restrict a, float * restrict b, int size) {
-  // replace the following code with vectorized code
   __m128 a_vector, b_vector, a_mask, b_mask;        //initialise vectors used
   int num_even = size - size%4;                     //calculate number of iterations
   for(int i = 0; i < num_even; i+=4) {
@@ -179,7 +177,6 @@ void routine_4(float * restrict a, float * restrict b,
 
 void vectorized_4(float * restrict a, float * restrict b,
 		    float * restrict  c) {
-  // replace the following code with vectorized code
   __m128 a_vector, b_vector, c_vector, product_1, product_2;
   for(int i = 0; i < 2048; i+=4) {
     b_vector = _mm_load_ps(&b[i]);
@@ -209,7 +206,6 @@ int routine_5(unsigned char * restrict a,
 
 int vectorized_5(unsigned char * restrict a,
 		 unsigned char * restrict b, int size) {
-  // replace the following code with vectorized code
   int num_even = size - size%16;                  //
   int num_even_floats = num_even / 4;             //calculate number of iterations (as floats instead of char)
   float * a_as_floats = (float *) b;
@@ -246,20 +242,11 @@ void routine_6(float * restrict a, float * restrict b,
 
 void vectorized_6(float * restrict a, float * restrict b,
 		       float * restrict c) {
-  // replace the following code with vectorized code
-  a[0] = 0.0;                             
-  for ( int i = 1; i < 4; i++ ) {                   //use original code to deal with first 3, so that %4 = 0
-    float sum = 0.0;
-    for ( int j = 0; j < 3; j++ ) {
-      sum = sum +  b[i+j-1] * c[j];
-    }
-    a[i] = sum;
-  }
-  
   __m128 b_vector_1, b_vector_2, product_1, product_2, sum_1, sum_2, a_vector;
   __m128 c_vector_1 = _mm_setr_ps(c[0], c[1], c[2], 0.0f);    //initialise vector with 0 in c[3]
   __m128 c_vector_2 = _mm_setr_ps(0.0f, c[0], c[1], c[2]);    //initialise vector with 0 in c[0]
 
+  a[0] = 0.0; 
   for(int i = 4; i < 1020; i+=4) {
     b_vector_1 = _mm_setr_ps(b[i-1], b[i], b[i+1], b[i+2]);   //initialise vectors
     b_vector_2 = _mm_setr_ps(b[i+1], b[i+2], b[i+3], b[i+4]);
@@ -273,7 +260,7 @@ void vectorized_6(float * restrict a, float * restrict b,
     _mm_store_ps(&a[i], a_vector);
   }
 
-  for ( int i = 1020; i < 1023; i++ ) {
+  for ( int i = 1020; i < 1023; i++ ) {                       //use original code to deal with remainder(%4)
     float sum = 0.0;
     for ( int j = 0; j < 3; j++ ) {
       sum = sum +  b[i+j-1] * c[j];
