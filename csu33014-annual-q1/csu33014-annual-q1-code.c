@@ -185,9 +185,22 @@ void routine_4(float * restrict a, float * restrict b,
 void vectorized_4(float * restrict a, float * restrict b,
 		    float * restrict  c) {
   // replace the following code with vectorized code
-  for ( int i = 0; i < 2048; i = i+2  ) {
-    a[i] = b[i]*c[i+1] + b[i+1]*c[i];
-    a[i+1] = b[i]*c[i] - b[i+1]*c[i+1];
+  __m128 a_vec;
+  __m128 b_vec;
+  __m128 c_vec;
+  __m128 prod_1;
+  __m128 prod_2;
+  for(int i = 0; i < 2048; i+=4) {
+    b_vec = _mm_load_ps(&b[i]);
+    c_vec = _mm_load_ps(&c[i]);
+    prod_1 = _mm_mul_ps(b_vec, c_vec);
+    prod_1 = _mm_hsub_ps(prod_1, prod_1);
+    c_vec = _mm_shuffle_ps(c_vec, c_vec, _MM_SHUFFLE(2, 3, 0, 1));
+    prod_2 = _mm_mul_ps(b_vec, c_vec);
+    prod_2 = _mm_hadd_ps(prod_2, prod_2);
+    a_vec = _mm_shuffle_ps(prod_2, prod_1, _MM_SHUFFLE(3, 2, 3, 2));
+    a_vec = _mm_shuffle_ps(a_vec, a_vec, _MM_SHUFFLE(3, 1, 2, 0));
+    _mm_store_ps(&a[i], a_vec);
   }
 }
 
